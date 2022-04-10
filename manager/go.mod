@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/Portshift/go-utils v0.0.0-20220410101458-977521fb3634
-	github.com/apiclarity/trace-sampling-manager/api v0.0.0-20220410101706-41def8974ea4
+	github.com/apiclarity/trace-sampling-manager/api v0.0.0
 	github.com/go-openapi/loads v0.20.3
 	github.com/go-openapi/runtime v0.20.0
 	github.com/golang/mock v1.6.0
@@ -17,4 +17,4 @@ require (
 	k8s.io/client-go v0.23.5
 )
 
-//replace github.com/apiclarity/trace-sampling-manager/api v0.0.0 => ./../api
+replace github.com/apiclarity/trace-sampling-manager/api v0.0.0 => ./../api
