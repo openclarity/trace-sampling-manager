@@ -1,0 +1,46 @@
+swagger: "2.0"
+info:
+  version: "1.0.0"
+  title: "Trace Sampling Manager"
+
+basePath: /api
+
+schemes:
+  - http
+
+consumes: [ "application/json" ]
+produces: [ "application/json" ]
+
+definitions:
+  ApiResponse:
+    description: 'An object that is returned in all cases of failures.'
+    type: 'object'
+    properties:
+      message:
+        type: 'string'
+
+paths:
+  /hostsToTrace:
+    get:
+      summary: 'Get List of hosts to trace'
+      responses:
+        '200':
+          description: 'Success'
+          schema:
+            type: 'object'
+            required:
+              - apis
+            properties:
+              hosts:
+                type: 'array'
+                description: 'List of hosts to trace in the format of hostname:port'
+                items:
+                  type: 'string'
+        default:
+          $ref: '#/responses/UnknownError'
+
+responses:
+  UnknownError:
+    description: 'unknown error'
+    schema:
+      $ref: '#/definitions/ApiResponse'
