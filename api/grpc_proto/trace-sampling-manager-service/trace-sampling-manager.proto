@@ -10,12 +10,6 @@ service TraceSamplingManager {
     rpc GetHostsToTrace (GetHostsToTraceRequest) returns (GetHostsToTraceResponse){}
 }
 
-enum ComponentID {
-  UNKNOWN_COMPONENT = 0;
-  SPEC_RECONSTRUCTOR = 1;
-  TRACE_ANALYZER = 2;
-}
-
 message Host {
     string hostname = 1;
     int32 port = 2;
@@ -23,12 +17,9 @@ message Host {
 
 message HostsToTraceRequest {
     repeated Host hosts = 1;
-    ComponentID componentID = 2;
 }
 
-message GetHostsToTraceRequest {
-    ComponentID componentID = 1;
-}
+message GetHostsToTraceRequest {}
 
 message GetHostsToTraceResponse {
     repeated Host hosts = 1;

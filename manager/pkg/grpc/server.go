@@ -28,7 +28,7 @@ func (s *Server) GetHostsToTrace(_ context.Context, request *api.GetHostsToTrace
 	log.Debugf("Get hosts to trace was called. request=%+v", request)
 
 	ret := &api.GetHostsToTraceResponse{
-		Hosts: createAPIHosts(s.Getter.HostsToTraceByComponentID(request.ComponentID)),
+		Hosts: createAPIHosts(s.Getter.HostsToTrace()),
 	}
 
 	return ret, nil
@@ -77,7 +77,6 @@ func (s *Server) SetHostsToTrace(_ context.Context, request *api.HostsToTraceReq
 
 	s.Setter.SetHostsToTrace(&manager.HostsToTrace{
 		Hosts:       createHostsToTrace(request.Hosts),
-		ComponentID: request.ComponentID,
 	})
 
 	return &api.Empty{}, nil
