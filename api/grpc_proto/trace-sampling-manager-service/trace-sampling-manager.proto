@@ -17,9 +17,12 @@ message Host {
 
 message HostsToTraceRequest {
     repeated Host hosts = 1;
+    string componentID = 2;
 }
 
-message GetHostsToTraceRequest {}
+message GetHostsToTraceRequest {
+    string componentID = 1;
+}
 
 message GetHostsToTraceResponse {
     repeated Host hosts = 1;

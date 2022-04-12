@@ -11,13 +11,17 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/Portshift/go-utils/k8s/secret"
-	api "github.com/apiclarity/trace-sampling-manager/api/grpc_gen/trace-sampling-manager-service"
 	_interface "github.com/apiclarity/trace-sampling-manager/manager/pkg/manager/interface"
+)
+
+const (
+	SPEC_RECONSTRUCTOR = "SPEC_RECONSTRUCTOR"
+	TRACE_ANALYZER = "TRACE_ANALYZER"
 )
 
 func Test_createHostsToTrace(t *testing.T) {
 	type args struct {
-		componentIDToHosts map[api.ComponentID][]string
+		componentIDToHosts map[string][]string
 	}
 	tests := []struct {
 		name    string
@@ -27,9 +31,9 @@ func Test_createHostsToTrace(t *testing.T) {
 		{
 			name: "simple union",
 			args: args{
-				componentIDToHosts: map[api.ComponentID][]string{
-					api.ComponentID_SPEC_RECONSTRUCTOR: {"host:port"},
-					api.ComponentID_TRACE_ANALYZER:     {"host2:port2"},
+				componentIDToHosts: map[string][]string{
+					SPEC_RECONSTRUCTOR: {"host:port"},
+					TRACE_ANALYZER:     {"host2:port2"},
 				},
 			},
 			wantRet: []string{"host:port", "host2:port2"},
@@ -37,9 +41,9 @@ func Test_createHostsToTrace(t *testing.T) {
 		{
 			name: "same host on both",
 			args: args{
-				componentIDToHosts: map[api.ComponentID][]string{
-					api.ComponentID_SPEC_RECONSTRUCTOR: {"host:port"},
-					api.ComponentID_TRACE_ANALYZER:     {"host:port"},
+				componentIDToHosts: map[string][]string{
+					SPEC_RECONSTRUCTOR: {"host:port"},
+					TRACE_ANALYZER:     {"host:port"},
 				},
 			},
 			wantRet: []string{"host:port"},
@@ -47,9 +51,9 @@ func Test_createHostsToTrace(t *testing.T) {
 		{
 			name: "empty list in ComponentID_SPEC_RECONSTRUCTOR",
 			args: args{
-				componentIDToHosts: map[api.ComponentID][]string{
-					api.ComponentID_SPEC_RECONSTRUCTOR: nil,
-					api.ComponentID_TRACE_ANALYZER:     {"host:port"},
+				componentIDToHosts: map[string][]string{
+					SPEC_RECONSTRUCTOR: nil,
+					TRACE_ANALYZER:     {"host:port"},
 				},
 			},
 			wantRet: []string{"host:port"},
@@ -57,9 +61,9 @@ func Test_createHostsToTrace(t *testing.T) {
 		{
 			name: "empty list in ComponentID_TRACE_ANALYZER",
 			args: args{
-				componentIDToHosts: map[api.ComponentID][]string{
-					api.ComponentID_TRACE_ANALYZER:     nil,
-					api.ComponentID_SPEC_RECONSTRUCTOR: {"host:port"},
+				componentIDToHosts: map[string][]string{
+					TRACE_ANALYZER:     nil,
+					SPEC_RECONSTRUCTOR: {"host:port"},
 				},
 			},
 			wantRet: []string{"host:port"},
@@ -67,9 +71,9 @@ func Test_createHostsToTrace(t *testing.T) {
 		{
 			name: "empty list in all",
 			args: args{
-				componentIDToHosts: map[api.ComponentID][]string{
-					api.ComponentID_TRACE_ANALYZER:     nil,
-					api.ComponentID_SPEC_RECONSTRUCTOR: nil,
+				componentIDToHosts: map[string][]string{
+					TRACE_ANALYZER:     nil,
+					SPEC_RECONSTRUCTOR: nil,
 				},
 			},
 			wantRet: nil,
@@ -77,8 +81,8 @@ func Test_createHostsToTrace(t *testing.T) {
 		{
 			name: "missing component ID",
 			args: args{
-				componentIDToHosts: map[api.ComponentID][]string{
-					api.ComponentID_TRACE_ANALYZER: {"host:port"},
+				componentIDToHosts: map[string][]string{
+					TRACE_ANALYZER: {"host:port"},
 				},
 			},
 			wantRet: []string{"host:port"},
@@ -107,9 +111,9 @@ func TestManager_getComponentIDToHosts(t *testing.T) {
 		Resource: "secret",
 	}
 
-	testComponentIDToHosts := map[api.ComponentID][]string{
-		api.ComponentID_TRACE_ANALYZER:     {"host:80", "host"},
-		api.ComponentID_SPEC_RECONSTRUCTOR: {"host:8080"},
+	testComponentIDToHosts := map[string][]string{
+		TRACE_ANALYZER:     {"host:80", "host"},
+		SPEC_RECONSTRUCTOR: {"host:8080"},
 	}
 
 	testSecret, _ := createSecret(testComponentIDToHosts)
@@ -120,7 +124,7 @@ func TestManager_getComponentIDToHosts(t *testing.T) {
 	tests := []struct {
 		name    string
 		fields  fields
-		want    map[api.ComponentID][]string
+		want    map[string][]string
 		wantErr bool
 	}{
 		{
@@ -206,14 +210,14 @@ func TestManager_initHostToTrace(t *testing.T) {
 
 	secretMockHandler := secret.NewMockHandler(mock)
 
-	testComponentIDToHosts := map[api.ComponentID][]string{
-		api.ComponentID_TRACE_ANALYZER:     {"host:80", "host"},
-		api.ComponentID_SPEC_RECONSTRUCTOR: {"host:8080"},
+	testComponentIDToHosts := map[string][]string{
+		TRACE_ANALYZER:     {"host:80", "host"},
+		SPEC_RECONSTRUCTOR: {"host:8080"},
 	}
 
 	testSecret, _ := createSecret(testComponentIDToHosts)
 	testSecretNilMap, _ := createSecret(nil)
-	testSecretEmptyMap, _ := createSecret(map[api.ComponentID][]string{})
+	testSecretEmptyMap, _ := createSecret(map[string][]string{})
 
 	type fields struct {
 		expectSecretHandler func(handler *secret.MockHandler)
@@ -222,7 +226,7 @@ func TestManager_initHostToTrace(t *testing.T) {
 		name                       string
 		fields                     fields
 		wantErr                    bool
-		expectedComponentIDToHosts map[api.ComponentID][]string
+		expectedComponentIDToHosts map[string][]string
 		expectedHostsToTrace       []string
 	}{
 		{
@@ -255,7 +259,7 @@ func TestManager_initHostToTrace(t *testing.T) {
 				},
 			},
 			wantErr:                    false,
-			expectedComponentIDToHosts: make(map[api.ComponentID][]string),
+			expectedComponentIDToHosts: make(map[string][]string),
 			expectedHostsToTrace:       nil,
 		},
 		{
@@ -266,7 +270,7 @@ func TestManager_initHostToTrace(t *testing.T) {
 				},
 			},
 			wantErr:                    false,
-			expectedComponentIDToHosts: make(map[api.ComponentID][]string),
+			expectedComponentIDToHosts: make(map[string][]string),
 			expectedHostsToTrace:       nil,
 		},
 	}
@@ -289,7 +293,7 @@ func TestManager_initHostToTrace(t *testing.T) {
 			}
 			if !tt.wantErr {
 				// assignment validation that we do not crash on assignment
-				m.componentIDToHosts[api.ComponentID_SPEC_RECONSTRUCTOR] = []string{"test"}
+				m.componentIDToHosts[SPEC_RECONSTRUCTOR] = []string{"test"}
 			}
 		})
 	}
@@ -301,25 +305,25 @@ func TestManager_SetHostsToTrace(t *testing.T) {
 
 	secretMockHandler := secret.NewMockHandler(mock)
 
-	testComponentIDToHostsBefore := map[api.ComponentID][]string{
-		api.ComponentID_SPEC_RECONSTRUCTOR: {"host:8080"},
+	testComponentIDToHostsBefore := map[string][]string{
+		SPEC_RECONSTRUCTOR: {"host:8080"},
 	}
 	testHostToTraceBefore := []string{"host:8080"}
 
-	testComponentIDToHostsBeforeWithTraceAnalyzer := map[api.ComponentID][]string{
-		api.ComponentID_TRACE_ANALYZER:     {"blalala"},
-		api.ComponentID_SPEC_RECONSTRUCTOR: {"host:8080"},
+	testComponentIDToHostsBeforeWithTraceAnalyzer := map[string][]string{
+		TRACE_ANALYZER:     {"blalala"},
+		SPEC_RECONSTRUCTOR: {"host:8080"},
 	}
 	testHostToTraceBeforeWithTraceAnalyzer := []string{"host:8080", "blalala"}
 
 	hostsToTraceInput := &_interface.HostsToTrace{
 		Hosts:       []string{"host:80", "host"},
-		ComponentID: api.ComponentID_TRACE_ANALYZER,
+		ComponentID: TRACE_ANALYZER,
 	}
 
-	testComponentIDToHostsAfter := map[api.ComponentID][]string{
-		api.ComponentID_TRACE_ANALYZER:     {"host:80", "host"},
-		api.ComponentID_SPEC_RECONSTRUCTOR: {"host:8080"},
+	testComponentIDToHostsAfter := map[string][]string{
+		TRACE_ANALYZER:     {"host:80", "host"},
+		SPEC_RECONSTRUCTOR: {"host:8080"},
 	}
 	testHostToTraceAfter := []string{"host:80", "host", "host:8080"}
 
@@ -328,7 +332,7 @@ func TestManager_SetHostsToTrace(t *testing.T) {
 	type fields struct {
 		expectSecretHandler func(handler *secret.MockHandler)
 		hostsToTrace        []string
-		componentIDToHosts  map[api.ComponentID][]string
+		componentIDToHosts  map[string][]string
 	}
 	type args struct {
 		hostsToTrace *_interface.HostsToTrace
@@ -337,7 +341,7 @@ func TestManager_SetHostsToTrace(t *testing.T) {
 		name                       string
 		fields                     fields
 		args                       args
-		expectedComponentIDToHosts map[api.ComponentID][]string
+		expectedComponentIDToHosts map[string][]string
 		expectedHostsToTrace       []string
 	}{
 		{
