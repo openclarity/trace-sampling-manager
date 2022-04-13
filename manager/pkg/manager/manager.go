@@ -114,7 +114,7 @@ func (m *Manager) SetHostsToTrace(hostsToTrace *_interface.HostsToTrace) {
 func (m *Manager) initHostToTrace() error {
 	componentIDToHosts, err := m.getComponentIDToHosts()
 	if err != nil {
-		return fmt.Errorf("failed to get component ID to hosts: %v", err)
+		log.Warnf("Failed to get component ID to hosts: %v", err)
 	}
 
 	if componentIDToHosts == nil {
