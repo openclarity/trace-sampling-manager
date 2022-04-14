@@ -7,10 +7,10 @@ SHELL=/bin/bash
 
 # Project variables
 BINARY_NAME ?= trace-sampling-manager
-DOCKER_REGISTRY ?= gcr.io/eticloud/k8sec
+#DOCKER_REGISTRY ?= gcr.io/eticloud/k8sec
 VERSION ?= $(shell git rev-parse HEAD)
-DOCKER_IMAGE ?= $(DOCKER_REGISTRY)/$(BINARY_NAME)
-DOCKER_TAG ?= ${VERSION}
+#DOCKER_IMAGE ?= $(DOCKER_REGISTRY)/$(BINARY_NAME)
+#DOCKER_TAG ?= ${VERSION}
 
 # HELP
 # This will output the help for each task
@@ -30,17 +30,17 @@ build: ## Build Trace Sampling Manager
 build_ci:
 	@(cd manager && go build -o $(WORKSPACE)/artifacts/trace-sampling-manager cmd/manager/main.go)
 
-.PHONY: docker_build
-docker_build: ## Build Trace Sampling Manager docker image
-	@(echo "Building Trace Sampling Manager docker image [${DOCKER_IMAGE}:${DOCKER_TAG}] ..." )
-	@(cd manager && GOOS=linux go build -o bin/trace-sampling-manager cmd/manager/main.go)
-	@(mkdir docker/artifacts && mv manager/bin/trace-sampling-manager docker/artifacts)
-	@(cd docker && docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} . && rm -rf ./artifacts)
-
-.PHONY: docker_push
-docker_push: docker_build ## Build Trace Sampling Manager docker image and push it to remote
-	@(echo "Pushing Trace Sampling Manager docker image [${DOCKER_IMAGE}:${DOCKER_TAG}] ..." )
-	@(docker push ${DOCKER_IMAGE}:${DOCKER_TAG})
+#.PHONY: docker_build
+#docker_build: ## Build Trace Sampling Manager docker image
+#	@(echo "Building Trace Sampling Manager docker image [${DOCKER_IMAGE}:${DOCKER_TAG}] ..." )
+#	@(cd manager && GOOS=linux go build -o bin/trace-sampling-manager cmd/manager/main.go)
+#	@(mkdir docker/artifacts && mv manager/bin/trace-sampling-manager docker/artifacts)
+#	@(cd docker && docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} . && rm -rf ./artifacts)
+#
+#.PHONY: docker_push
+#docker_push: docker_build ## Build Trace Sampling Manager docker image and push it to remote
+#	@(echo "Pushing Trace Sampling Manager docker image [${DOCKER_IMAGE}:${DOCKER_TAG}] ..." )
+#	@(docker push ${DOCKER_IMAGE}:${DOCKER_TAG})
 
 .PHONY: api
 api: ## Generating API code
