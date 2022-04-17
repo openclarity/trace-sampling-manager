@@ -30,10 +30,8 @@ func CreateRESTServer(port int, getter manager.Getter) (*Server, error) {
 	api := operations.NewTraceSamplingManagerAPI(swaggerSpec)
 
 	api.GetHostsToTraceHandler = operations.GetHostsToTraceHandlerFunc(func(params operations.GetHostsToTraceParams) middleware.Responder {
-		hosts := s.HostsToTrace()
-		log.Errorf("hosts : %v", hosts)
 		return operations.NewGetHostsToTraceOK().WithPayload(&operations.GetHostsToTraceOKBody{
-			Hosts: hosts,
+			Hosts: s.HostsToTrace(),
 		})
 	})
 
