@@ -27,10 +27,6 @@ api: ## Generating API code
 test: ## Run Unit Tests
 	@(cd manager && go test ./pkg/...)
 
-.PHONY: clean
-clean: ## Clean all build artifacts
-	@(rm -rf manager/bin/* ; echo "Build artifacts cleanup done" )
-
 bin/golangci-lint: bin/golangci-lint-${GOLANGCI_VERSION}
 	@ln -sf golangci-lint-${GOLANGCI_VERSION} bin/golangci-lint
 bin/golangci-lint-${GOLANGCI_VERSION}:
