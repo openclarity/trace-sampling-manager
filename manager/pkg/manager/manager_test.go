@@ -20,18 +20,18 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/Portshift/go-utils/k8s/secret"
 	"github.com/golang/mock/gomock"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	"github.com/Portshift/go-utils/k8s/secret"
 	_interface "github.com/apiclarity/trace-sampling-manager/manager/pkg/manager/interface"
 )
 
 const (
-	SPEC_RECONSTRUCTOR = "SPEC_RECONSTRUCTOR"
-	TRACE_ANALYZER = "TRACE_ANALYZER"
+	SpecReconstructor = "SPEC_RECONSTRUCTOR"
+	TraceAnalyzer     = "TRACE_ANALYZER"
 )
 
 func Test_createHostsToTrace(t *testing.T) {
@@ -47,8 +47,8 @@ func Test_createHostsToTrace(t *testing.T) {
 			name: "simple union",
 			args: args{
 				componentIDToHosts: map[string][]string{
-					SPEC_RECONSTRUCTOR: {"host:port"},
-					TRACE_ANALYZER:     {"host2:port2"},
+					SpecReconstructor: {"host:port"},
+					TraceAnalyzer:     {"host2:port2"},
 				},
 			},
 			wantRet: []string{"host:port", "host2:port2"},
@@ -57,8 +57,8 @@ func Test_createHostsToTrace(t *testing.T) {
 			name: "same host on both",
 			args: args{
 				componentIDToHosts: map[string][]string{
-					SPEC_RECONSTRUCTOR: {"host:port"},
-					TRACE_ANALYZER:     {"host:port"},
+					SpecReconstructor: {"host:port"},
+					TraceAnalyzer:     {"host:port"},
 				},
 			},
 			wantRet: []string{"host:port"},
@@ -67,8 +67,8 @@ func Test_createHostsToTrace(t *testing.T) {
 			name: "empty list in ComponentID_SPEC_RECONSTRUCTOR",
 			args: args{
 				componentIDToHosts: map[string][]string{
-					SPEC_RECONSTRUCTOR: nil,
-					TRACE_ANALYZER:     {"host:port"},
+					SpecReconstructor: nil,
+					TraceAnalyzer:     {"host:port"},
 				},
 			},
 			wantRet: []string{"host:port"},
@@ -77,8 +77,8 @@ func Test_createHostsToTrace(t *testing.T) {
 			name: "empty list in ComponentID_TRACE_ANALYZER",
 			args: args{
 				componentIDToHosts: map[string][]string{
-					TRACE_ANALYZER:     nil,
-					SPEC_RECONSTRUCTOR: {"host:port"},
+					TraceAnalyzer:     nil,
+					SpecReconstructor: {"host:port"},
 				},
 			},
 			wantRet: []string{"host:port"},
@@ -87,8 +87,8 @@ func Test_createHostsToTrace(t *testing.T) {
 			name: "empty list in all",
 			args: args{
 				componentIDToHosts: map[string][]string{
-					TRACE_ANALYZER:     nil,
-					SPEC_RECONSTRUCTOR: nil,
+					TraceAnalyzer:     nil,
+					SpecReconstructor: nil,
 				},
 			},
 			wantRet: nil,
@@ -97,7 +97,7 @@ func Test_createHostsToTrace(t *testing.T) {
 			name: "missing component ID",
 			args: args{
 				componentIDToHosts: map[string][]string{
-					TRACE_ANALYZER: {"host:port"},
+					TraceAnalyzer: {"host:port"},
 				},
 			},
 			wantRet: []string{"host:port"},
@@ -127,8 +127,8 @@ func TestManager_getComponentIDToHosts(t *testing.T) {
 	}
 
 	testComponentIDToHosts := map[string][]string{
-		TRACE_ANALYZER:     {"host:80", "host"},
-		SPEC_RECONSTRUCTOR: {"host:8080"},
+		TraceAnalyzer:     {"host:80", "host"},
+		SpecReconstructor: {"host:8080"},
 	}
 
 	testSecret, _ := createSecret(testComponentIDToHosts)
@@ -226,8 +226,8 @@ func TestManager_initHostToTrace(t *testing.T) {
 	secretMockHandler := secret.NewMockHandler(mock)
 
 	testComponentIDToHosts := map[string][]string{
-		TRACE_ANALYZER:     {"host:80", "host"},
-		SPEC_RECONSTRUCTOR: {"host:8080"},
+		TraceAnalyzer:     {"host:80", "host"},
+		SpecReconstructor: {"host:8080"},
 	}
 
 	testSecret, _ := createSecret(testComponentIDToHosts)
@@ -240,7 +240,6 @@ func TestManager_initHostToTrace(t *testing.T) {
 	tests := []struct {
 		name                       string
 		fields                     fields
-		wantErr                    bool
 		expectedComponentIDToHosts map[string][]string
 		expectedHostsToTrace       []string
 	}{
@@ -251,7 +250,6 @@ func TestManager_initHostToTrace(t *testing.T) {
 					handler.EXPECT().Get(hostToTraceSecretMeta).Return(nil, errors.NewBadRequest(""))
 				},
 			},
-			wantErr:                    false,
 			expectedComponentIDToHosts: map[string][]string{},
 			expectedHostsToTrace:       nil,
 		},
@@ -262,7 +260,6 @@ func TestManager_initHostToTrace(t *testing.T) {
 					handler.EXPECT().Get(hostToTraceSecretMeta).Return(testSecret, nil)
 				},
 			},
-			wantErr:                    false,
 			expectedComponentIDToHosts: testComponentIDToHosts,
 			expectedHostsToTrace:       []string{"host:80", "host", "host:8080"},
 		},
@@ -273,7 +270,6 @@ func TestManager_initHostToTrace(t *testing.T) {
 					handler.EXPECT().Get(hostToTraceSecretMeta).Return(testSecretNilMap, nil)
 				},
 			},
-			wantErr:                    false,
 			expectedComponentIDToHosts: make(map[string][]string),
 			expectedHostsToTrace:       nil,
 		},
@@ -284,7 +280,6 @@ func TestManager_initHostToTrace(t *testing.T) {
 					handler.EXPECT().Get(hostToTraceSecretMeta).Return(testSecretEmptyMap, nil)
 				},
 			},
-			wantErr:                    false,
 			expectedComponentIDToHosts: make(map[string][]string),
 			expectedHostsToTrace:       nil,
 		},
@@ -295,9 +290,7 @@ func TestManager_initHostToTrace(t *testing.T) {
 				Handler: secretMockHandler,
 			}
 			tt.fields.expectSecretHandler(secretMockHandler)
-			if err := m.initHostToTrace(); (err != nil) != tt.wantErr {
-				t.Errorf("initHostToTrace() error = %v, wantErr %v", err, tt.wantErr)
-			}
+			m.initHostToTrace()
 			sort.Strings(m.hostsToTrace)
 			sort.Strings(tt.expectedHostsToTrace)
 			if !reflect.DeepEqual(m.hostsToTrace, tt.expectedHostsToTrace) {
@@ -306,10 +299,8 @@ func TestManager_initHostToTrace(t *testing.T) {
 			if !reflect.DeepEqual(m.componentIDToHosts, tt.expectedComponentIDToHosts) {
 				t.Errorf("initHostToTrace() componentIDToHosts missmatch. got = %+v, expected = %+v", m.componentIDToHosts, tt.expectedComponentIDToHosts)
 			}
-			if !tt.wantErr {
-				// assignment validation that we do not crash on assignment
-				m.componentIDToHosts[SPEC_RECONSTRUCTOR] = []string{"test"}
-			}
+			// assignment validation that we do not crash on assignment
+			m.componentIDToHosts[SpecReconstructor] = []string{"test"}
 		})
 	}
 }
@@ -321,24 +312,24 @@ func TestManager_SetHostsToTrace(t *testing.T) {
 	secretMockHandler := secret.NewMockHandler(mock)
 
 	testComponentIDToHostsBefore := map[string][]string{
-		SPEC_RECONSTRUCTOR: {"host:8080"},
+		SpecReconstructor: {"host:8080"},
 	}
 	testHostToTraceBefore := []string{"host:8080"}
 
 	testComponentIDToHostsBeforeWithTraceAnalyzer := map[string][]string{
-		TRACE_ANALYZER:     {"blalala"},
-		SPEC_RECONSTRUCTOR: {"host:8080"},
+		TraceAnalyzer:     {"blalala"},
+		SpecReconstructor: {"host:8080"},
 	}
 	testHostToTraceBeforeWithTraceAnalyzer := []string{"host:8080", "blalala"}
 
 	hostsToTraceInput := &_interface.HostsToTrace{
 		Hosts:       []string{"host:80", "host"},
-		ComponentID: TRACE_ANALYZER,
+		ComponentID: TraceAnalyzer,
 	}
 
 	testComponentIDToHostsAfter := map[string][]string{
-		TRACE_ANALYZER:     {"host:80", "host"},
-		SPEC_RECONSTRUCTOR: {"host:8080"},
+		TraceAnalyzer:     {"host:80", "host"},
+		SpecReconstructor: {"host:8080"},
 	}
 	testHostToTraceAfter := []string{"host:80", "host", "host:8080"}
 

@@ -20,13 +20,13 @@ import (
 	"fmt"
 	"sync"
 
+	_secret "github.com/Portshift/go-utils/k8s/secret"
 	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
-	_secret "github.com/Portshift/go-utils/k8s/secret"
 	"github.com/apiclarity/trace-sampling-manager/manager/pkg/grpc"
 	_interface "github.com/apiclarity/trace-sampling-manager/manager/pkg/manager/interface"
 	"github.com/apiclarity/trace-sampling-manager/manager/pkg/rest"
@@ -66,9 +66,7 @@ func Create(clientset kubernetes.Interface, conf *Config) (*Manager, error) {
 		Handler: _secret.NewHandler(clientset),
 	}
 
-	if err := m.initHostToTrace(); err != nil {
-		log.Warnf("failed to init hosts to trace list - initializing with empty list: %v", err)
-	}
+	m.initHostToTrace()
 
 	m.restServer, err = rest.CreateRESTServer(conf.RestServerPort, m)
 	if err != nil {
@@ -125,8 +123,8 @@ func (m *Manager) SetHostsToTrace(hostsToTrace *_interface.HostsToTrace) {
 	}
 }
 
-// initHostToTrace will fetch hosts per component map from secret and set manager initial state
-func (m *Manager) initHostToTrace() error {
+// initHostToTrace will fetch hosts per component map from secret and set manager initial state.
+func (m *Manager) initHostToTrace() {
 	componentIDToHosts, err := m.getComponentIDToHosts()
 	if err != nil {
 		log.Warnf("Failed to get component ID to hosts: %v", err)
@@ -141,11 +139,9 @@ func (m *Manager) initHostToTrace() error {
 
 	log.Infof("Successfully initialized host to trace state. "+
 		"hostsToTrace=%+v, componentIDToHosts=%+v", m.hostsToTrace, m.componentIDToHosts)
-
-	return nil
 }
 
-// getComponentIDToHosts will fetch hosts per component map from secret
+// getComponentIDToHosts will fetch hosts per component map from secret.
 func (m *Manager) getComponentIDToHosts() (map[string][]string, error) {
 	var s *corev1.Secret
 	var err error
@@ -172,7 +168,7 @@ func (m *Manager) getComponentIDToHosts() (map[string][]string, error) {
 	return componentIDToHosts, nil
 }
 
-// createHostsToTrace will create a union of hosts need to be traced from all components
+// createHostsToTrace will create a union of hosts need to be traced from all components.
 func createHostsToTrace(componentIDToHosts map[string][]string) (ret []string) {
 	hostsToLearnUnion := make(map[string]struct{})
 	for _, hosts := range componentIDToHosts {
@@ -188,7 +184,7 @@ func createHostsToTrace(componentIDToHosts map[string][]string) (ret []string) {
 	return ret
 }
 
-// saveComponentIDToHosts will save hosts per component map to secret
+// saveComponentIDToHosts will save hosts per component map to secret.
 func (m *Manager) saveComponentIDToHosts() error {
 	var s *corev1.Secret
 	var err error

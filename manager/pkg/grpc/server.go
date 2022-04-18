@@ -17,6 +17,7 @@ package grpc
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"strconv"
@@ -91,7 +92,7 @@ func (s *Server) SetHostsToTrace(_ context.Context, request *api.HostsToTraceReq
 	log.Debugf("Got hosts to trace. request=%+v", request)
 
 	s.Setter.SetHostsToTrace(&manager.HostsToTrace{
-		Hosts:       createHostsToTrace(request.Hosts),
+		Hosts: createHostsToTrace(request.Hosts),
 	})
 
 	return &api.Empty{}, nil
@@ -106,7 +107,7 @@ func createHostsToTrace(hosts []*api.Host) (ret []string) {
 }
 
 // createHosts will create hosts in the format of `hostname:port` if port exist, otherwise will return only hostname
-// Note: The function will return both `hostname:port` and `hostname` in case port is the default HTTP port (80)
+// Note: The function will return both `hostname:port` and `hostname` in case port is the default HTTP port (80).
 func createHosts(h *api.Host) (ret []string) {
 	// TODO: we might need to create multiple hosts from a single api.Host
 	// example: hostname=foo, port=8080 ==> host=[foo:8080, foo.namespace:8080, ....]
@@ -135,7 +136,7 @@ func NewServer(port int, setter manager.Setter, getter manager.Getter) *Server {
 	return server
 }
 
-// Start starts the server run
+// Start starts the server run.
 func (s *Server) Start(errChan chan struct{}) error {
 	log.Infof("Starting GRPC server")
 
@@ -148,7 +149,7 @@ func (s *Server) Start(errChan chan struct{}) error {
 	s.listener = listener
 
 	go func() {
-		if err := s.server.Serve(s.listener); err != nil && err != grpc.ErrServerStopped {
+		if err := s.server.Serve(s.listener); err != nil && !errors.Is(err, grpc.ErrServerStopped) {
 			log.Errorf("Failed to serve GRPC server: %v", err)
 			if errChan != nil {
 				errChan <- struct{}{}
@@ -159,7 +160,7 @@ func (s *Server) Start(errChan chan struct{}) error {
 	return nil
 }
 
-// Stop gracefully shuts down the server
+// Stop gracefully shuts down the server.
 func (s *Server) Stop() {
 	log.Infof("Stopping GRPC server")
 	if s.server != nil {
