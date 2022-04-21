@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package trace_sampling_manager;
+
+option go_package = "grpc_proto/trace_sampling_manager";
+
+// The Trace Sampling Manager service definition.
+service TraceSamplingManager {
+    rpc SetHostsToTrace (HostsToTraceRequest) returns (Empty){}
+    rpc GetHostsToTrace (GetHostsToTraceRequest) returns (GetHostsToTraceResponse){}
+}
+
+message Host {
+    string hostname = 1;
+    int32 port = 2;
+}
+
+message HostsToTraceRequest {
+    repeated Host hosts = 1;
+    string componentID = 2;
+}
+
+message GetHostsToTraceRequest {
+    string componentID = 1;
+}
+
+message GetHostsToTraceResponse {
+    repeated Host hosts = 1;
+}
+
+message Empty {}
