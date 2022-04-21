@@ -9,6 +9,10 @@ approved = [
 
 ignored = [
   "github.com/ghodss/yaml", # MIT - https://github.com/ghodss/yaml/blob/master/LICENSE
+  "google.golang.org/protobuf", # BSD-3-Clause - https://pkg.go.dev/google.golang.org/protobuf?tab=licenses
+  "github.com/gogo/protobuf", # BSD-3-Clause - https://pkg.go.dev/github.com/gogo/protobuf?tab=licenses
+  "sigs.k8s.io/yaml", # MIT - https://github.com/kubernetes-sigs/yaml/blob/master/LICENSE
+  "go.mongodb.org/mongo-driver", # Apache 2.0 - https://github.com/mongodb/mongo-go-driver/blob/master/LICENSE
 ]
 
 [header]

@@ -75,6 +75,8 @@ func createAPIHost(host string) (ret *api.Host, err error) {
 	hostname = hostnameAndPort[0]
 
 	if len(hostnameAndPort) > 1 {
+		//nolint:gosec
+		// TODO figure out safer alternative to use strconv.Atoi
 		port, err = strconv.Atoi(hostnameAndPort[1])
 		if err != nil {
 			// should not happen
