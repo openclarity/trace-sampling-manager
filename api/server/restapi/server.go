@@ -25,7 +25,7 @@ import (
 	flags "github.com/jessevdk/go-flags"
 	"golang.org/x/net/netutil"
 
-	"github.com/apiclarity/trace-sampling-manager/api/server/restapi/operations"
+	"github.com/openclarity/trace-sampling-manager/api/server/restapi/operations"
 )
 
 const (

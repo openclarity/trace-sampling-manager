@@ -22,9 +22,9 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/apiclarity/trace-sampling-manager/api/server/restapi"
-	"github.com/apiclarity/trace-sampling-manager/api/server/restapi/operations"
-	manager "github.com/apiclarity/trace-sampling-manager/manager/pkg/manager/interface"
+	"github.com/openclarity/trace-sampling-manager/api/server/restapi"
+	"github.com/openclarity/trace-sampling-manager/api/server/restapi/operations"
+	manager "github.com/openclarity/trace-sampling-manager/manager/pkg/manager/interface"
 )
 
 type Server struct {

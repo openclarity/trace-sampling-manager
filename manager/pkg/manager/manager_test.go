@@ -26,7 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	_interface "github.com/apiclarity/trace-sampling-manager/manager/pkg/manager/interface"
+	_interface "github.com/openclarity/trace-sampling-manager/manager/pkg/manager/interface"
 )
 
 const (

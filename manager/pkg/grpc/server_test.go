@@ -20,7 +20,7 @@ import (
 	"sort"
 	"testing"
 
-	api "github.com/apiclarity/trace-sampling-manager/api/grpc_gen/trace-sampling-manager-service"
+	api "github.com/openclarity/trace-sampling-manager/api/grpc_gen/trace-sampling-manager-service"
 )
 
 func Test_createHost(t *testing.T) {

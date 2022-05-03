@@ -27,9 +27,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/apiclarity/trace-sampling-manager/manager/pkg/grpc"
-	_interface "github.com/apiclarity/trace-sampling-manager/manager/pkg/manager/interface"
-	"github.com/apiclarity/trace-sampling-manager/manager/pkg/rest"
+	"github.com/openclarity/trace-sampling-manager/manager/pkg/grpc"
+	_interface "github.com/openclarity/trace-sampling-manager/manager/pkg/manager/interface"
+	"github.com/openclarity/trace-sampling-manager/manager/pkg/rest"
 )
 
 const (

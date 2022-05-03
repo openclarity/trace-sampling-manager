@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/apiclarity/trace-sampling-manager/api/server/models"
+	"github.com/openclarity/trace-sampling-manager/api/server/models"
 )
 
 // GetHostsToTraceOKCode is the HTTP code returned for type GetHostsToTraceOK

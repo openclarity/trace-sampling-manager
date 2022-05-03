@@ -1,4 +1,4 @@
-module github.com/apiclarity/trace-sampling-manager/api
+module github.com/openclarity/trace-sampling-manager/api
 
 go 1.16
 
