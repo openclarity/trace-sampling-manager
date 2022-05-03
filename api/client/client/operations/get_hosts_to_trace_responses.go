@@ -14,7 +14,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
-	"github.com/apiclarity/trace-sampling-manager/api/client/models"
+	"github.com/openclarity/trace-sampling-manager/api/client/models"
 )
 
 // GetHostsToTraceReader is a Reader for the GetHostsToTrace structure.

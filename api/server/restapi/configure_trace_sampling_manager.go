@@ -9,7 +9,7 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 
-	"github.com/apiclarity/trace-sampling-manager/api/server/restapi/operations"
+	"github.com/openclarity/trace-sampling-manager/api/server/restapi/operations"
 )
 
 //go:generate swagger generate server --target ../../server --name TraceSamplingManager --spec ../../swagger.yaml --principal interface{}

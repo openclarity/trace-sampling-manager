@@ -26,8 +26,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 
-	api "github.com/apiclarity/trace-sampling-manager/api/grpc_gen/trace-sampling-manager-service"
-	manager "github.com/apiclarity/trace-sampling-manager/manager/pkg/manager/interface"
+	api "github.com/openclarity/trace-sampling-manager/api/grpc_gen/trace-sampling-manager-service"
+	manager "github.com/openclarity/trace-sampling-manager/manager/pkg/manager/interface"
 )
 
 const hostnamePortSeparator = ":"
