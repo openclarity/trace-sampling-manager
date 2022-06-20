@@ -55,6 +55,7 @@ type Manager struct {
 	grpcServer *grpc.Server
 
 	hostsToTrace       []string
+	enabled            bool
 	componentIDToHosts map[string][]string
 
 	sync.RWMutex
@@ -64,6 +65,7 @@ func Create(clientset kubernetes.Interface, conf *Config) (*Manager, error) {
 	var err error
 	m := &Manager{
 		Handler: _secret.NewHandler(clientset),
+		enabled: true,
 	}
 
 	m.initHostToTrace()
@@ -100,6 +102,10 @@ func (m *Manager) HostsToTrace() []string {
 	m.RLock()
 	defer m.RUnlock()
 
+	if !m.enabled {
+		return []string{}
+	}
+
 	return m.hostsToTrace
 }
 
@@ -107,7 +113,18 @@ func (m *Manager) HostsToTraceByComponentID(id string) []string {
 	m.RLock()
 	defer m.RUnlock()
 
+	if !m.enabled {
+		return []string{}
+	}
+
 	return m.componentIDToHosts[id]
+}
+
+func (m *Manager) SetMode(enable bool) {
+	m.Lock()
+	defer m.Unlock()
+
+	m.enabled = enable
 }
 
 func (m *Manager) SetHostsToTrace(hostsToTrace *_interface.HostsToTrace) {
@@ -121,6 +138,36 @@ func (m *Manager) SetHostsToTrace(hostsToTrace *_interface.HostsToTrace) {
 		// TODO: consider retrying
 		log.Errorf("failed to save component ID to hosts: %v", err)
 	}
+}
+
+func (m *Manager) SetHostsToRemove(hostsToTrace *_interface.HostsToTrace) {
+	m.Lock()
+	defer m.Unlock()
+
+	m.componentIDToHosts[hostsToTrace.ComponentID] = removeHosts(m.componentIDToHosts[hostsToTrace.ComponentID], hostsToTrace.Hosts)
+	m.hostsToTrace = createHostsToTrace(m.componentIDToHosts)
+	if err := m.saveComponentIDToHosts(); err != nil {
+		// TODO: consider retrying
+		log.Errorf("failed to save component ID to hosts: %v", err)
+	}
+}
+
+func removeHosts(from, toRemove []string) []string {
+	newList := []string{}
+	hostsToRemove := map[string]bool{}
+	currentHosts := map[string]bool{}
+	for _, host := range toRemove {
+		hostsToRemove[host] = true
+	}
+	for _, host := range from {
+		currentHosts[host] = true
+	}
+	for host := range currentHosts {
+		if !hostsToRemove[host] {
+			newList = append(newList, host)
+		}
+	}
+	return newList
 }
 
 // initHostToTrace will fetch hosts per component map from secret and set manager initial state.

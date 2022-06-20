@@ -7,6 +7,8 @@ option go_package = "grpc_proto/trace_sampling_manager";
 // The Trace Sampling Manager service definition.
 service TraceSamplingManager {
     rpc SetHostsToTrace (HostsToTraceRequest) returns (Empty){}
+    rpc SetHostsToRemove (HostsToRemoveRequest) returns (Empty){}
+    rpc SetMode (SetModeRequest) returns (Empty){}
     rpc GetHostsToTrace (GetHostsToTraceRequest) returns (GetHostsToTraceResponse){}
 }
 
@@ -20,12 +22,21 @@ message HostsToTraceRequest {
     string componentID = 2;
 }
 
+message HostsToRemoveRequest {
+    repeated Host hosts = 1;
+    string componentID = 2;
+}
+
 message GetHostsToTraceRequest {
     string componentID = 1;
 }
 
 message GetHostsToTraceResponse {
     repeated Host hosts = 1;
+}
+
+message SetModeRequest {
+    bool enable = 1;
 }
 
 message Empty {}

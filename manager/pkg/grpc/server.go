@@ -100,6 +100,24 @@ func (s *Server) SetHostsToTrace(_ context.Context, request *api.HostsToTraceReq
 	return &api.Empty{}, nil
 }
 
+func (s *Server) SetHostsToRemove(_ context.Context, request *api.HostsToRemoveRequest) (*api.Empty, error) {
+	log.Debugf("Got hosts to remove. request=%+v", request)
+
+	s.Setter.SetHostsToTrace(&manager.HostsToTrace{
+		Hosts: createHostsToTrace(request.Hosts),
+	})
+
+	return &api.Empty{}, nil
+}
+
+func (s *Server) SetMode(_ context.Context, request *api.SetModeRequest) (*api.Empty, error) {
+	log.Debugf("Got set mode. request=%+v", request)
+
+	s.Setter.SetMode(request.Enable)
+
+	return &api.Empty{}, nil
+}
+
 func createHostsToTrace(hosts []*api.Host) (ret []string) {
 	for _, host := range hosts {
 		ret = append(ret, createHosts(host)...)

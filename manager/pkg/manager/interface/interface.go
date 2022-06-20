@@ -27,4 +27,6 @@ type Getter interface {
 
 type Setter interface {
 	SetHostsToTrace(hostsToTrace *HostsToTrace)
+	SetMode(enable bool)
+	SetHostsToRemove(hostsToTrace *HostsToTrace)
 }
