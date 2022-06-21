@@ -56,7 +56,6 @@ type Manager struct {
 	grpcServer *grpc.Server
 
 	hostsToTrace       []string
-	enabled            bool
 	componentIDToHosts map[string][]string
 
 	sync.RWMutex
@@ -66,7 +65,6 @@ func Create(clientset kubernetes.Interface, conf *Config) (*Manager, error) {
 	var err error
 	m := &Manager{
 		Handler: _secret.NewHandler(clientset),
-		enabled: true,
 	}
 
 	m.initHostToTrace()
@@ -103,10 +101,6 @@ func (m *Manager) HostsToTrace() []string {
 	m.RLock()
 	defer m.RUnlock()
 
-	if !m.enabled {
-		return []string{}
-	}
-
 	return m.hostsToTrace
 }
 
@@ -114,18 +108,7 @@ func (m *Manager) HostsToTraceByComponentID(id string) []string {
 	m.RLock()
 	defer m.RUnlock()
 
-	if !m.enabled {
-		return []string{}
-	}
-
 	return m.componentIDToHosts[id]
-}
-
-func (m *Manager) SetMode(enable bool) {
-	m.Lock()
-	defer m.Unlock()
-
-	m.enabled = enable
 }
 
 func (m *Manager) SetHostsToTrace(hostsToTrace *_interface.HostsByComponentID) {

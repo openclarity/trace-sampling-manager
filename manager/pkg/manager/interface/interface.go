@@ -27,6 +27,5 @@ type Getter interface {
 
 type Setter interface {
 	SetHostsToTrace(hostsToTrace *HostsByComponentID)
-	SetMode(enable bool)
 	SetHostsToRemove(hostsToTrace *HostsByComponentID)
 }

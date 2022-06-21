@@ -110,14 +110,6 @@ func (s *Server) SetHostsToRemove(_ context.Context, request *api.HostsToRemoveR
 	return &api.Empty{}, nil
 }
 
-func (s *Server) SetMode(_ context.Context, request *api.SetModeRequest) (*api.Empty, error) {
-	log.Debugf("Got set mode. request=%+v", request)
-
-	s.Setter.SetMode(request.Enable)
-
-	return &api.Empty{}, nil
-}
-
 func createHostsList(hosts []*api.Host) (ret []string) {
 	for _, host := range hosts {
 		ret = append(ret, createHosts(host)...)

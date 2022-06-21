@@ -8,7 +8,6 @@ option go_package = "grpc_proto/trace_sampling_manager";
 service TraceSamplingManager {
     rpc SetHostsToTrace (HostsToTraceRequest) returns (Empty){}
     rpc SetHostsToRemove (HostsToRemoveRequest) returns (Empty){}
-    rpc SetMode (SetModeRequest) returns (Empty){}
     rpc GetHostsToTrace (GetHostsToTraceRequest) returns (GetHostsToTraceResponse){}
 }
 
@@ -33,10 +32,6 @@ message GetHostsToTraceRequest {
 
 message GetHostsToTraceResponse {
     repeated Host hosts = 1;
-}
-
-message SetModeRequest {
-    bool enable = 1;
 }
 
 message Empty {}
