@@ -30,6 +30,7 @@ import (
 	"github.com/openclarity/trace-sampling-manager/manager/pkg/grpc"
 	_interface "github.com/openclarity/trace-sampling-manager/manager/pkg/manager/interface"
 	"github.com/openclarity/trace-sampling-manager/manager/pkg/rest"
+	"github.com/openclarity/trace-sampling-manager/manager/pkg/utils"
 )
 
 const (
@@ -144,30 +145,12 @@ func (m *Manager) SetHostsToRemove(hostsToTrace *_interface.HostsByComponentID) 
 	m.Lock()
 	defer m.Unlock()
 
-	m.componentIDToHosts[hostsToTrace.ComponentID] = removeHosts(m.componentIDToHosts[hostsToTrace.ComponentID], hostsToTrace.Hosts)
+	m.componentIDToHosts[hostsToTrace.ComponentID] = utils.RemoveFromSlice(m.componentIDToHosts[hostsToTrace.ComponentID], hostsToTrace.Hosts)
 	m.hostsToTrace = createHostsToTrace(m.componentIDToHosts)
 	if err := m.saveComponentIDToHosts(); err != nil {
 		// TODO: consider retrying
 		log.Errorf("failed to save component ID to hosts: %v", err)
 	}
-}
-
-func removeHosts(from, toRemove []string) []string {
-	newList := []string{}
-	hostsToRemove := map[string]bool{}
-	currentHosts := map[string]bool{}
-	for _, host := range toRemove {
-		hostsToRemove[host] = true
-	}
-	for _, host := range from {
-		currentHosts[host] = true
-	}
-	for host := range currentHosts {
-		if !hostsToRemove[host] {
-			newList = append(newList, host)
-		}
-	}
-	return newList
 }
 
 // initHostToTrace will fetch hosts per component map from secret and set manager initial state.
