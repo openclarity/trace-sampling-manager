@@ -27,5 +27,5 @@ type Getter interface {
 
 type Setter interface {
 	SetHostsToTrace(hostsToTrace *HostsByComponentID)
-	RemoveHostsToTrace(hostsToTrace *HostsByComponentID)
+	RemoveHostsToTrace(hostsToRemove *HostsByComponentID)
 }
