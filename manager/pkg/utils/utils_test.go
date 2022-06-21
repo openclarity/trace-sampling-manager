@@ -68,6 +68,20 @@ func TestRemoveFromSlice(t *testing.T) {
 			},
 			want: []string{},
 		},
+		{
+			name: "host to remove is not in the list",
+			args: args{
+				from: []string{
+					"host1", "host2", "host3",
+				},
+				toRemove: []string{
+					"host4",
+				},
+			},
+			want: []string{
+				"host1", "host2", "host3",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

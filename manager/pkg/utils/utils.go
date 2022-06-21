@@ -16,15 +16,15 @@
 package utils
 
 func RemoveFromSlice(from, toRemove []string) []string {
-	newList := []string{}
+	ret := []string{}
 	hostsToRemove := map[string]bool{}
 	for _, host := range toRemove {
 		hostsToRemove[host] = true
 	}
 	for _, host := range from {
 		if !hostsToRemove[host] {
-			newList = append(newList, host)
+			ret = append(ret, host)
 		}
 	}
-	return newList
+	return ret
 }

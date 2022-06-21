@@ -124,11 +124,11 @@ func (m *Manager) SetHostsToTrace(hostsToTrace *_interface.HostsByComponentID) {
 	}
 }
 
-func (m *Manager) SetHostsToRemove(hostsToTrace *_interface.HostsByComponentID) {
+func (m *Manager) RemoveHostsToTrace(hostsToRemove *_interface.HostsByComponentID) {
 	m.Lock()
 	defer m.Unlock()
 
-	m.componentIDToHosts[hostsToTrace.ComponentID] = utils.RemoveFromSlice(m.componentIDToHosts[hostsToTrace.ComponentID], hostsToTrace.Hosts)
+	m.componentIDToHosts[hostsToRemove.ComponentID] = utils.RemoveFromSlice(m.componentIDToHosts[hostsToRemove.ComponentID], hostsToRemove.Hosts)
 	m.hostsToTrace = createHostsToTrace(m.componentIDToHosts)
 	if err := m.saveComponentIDToHosts(); err != nil {
 		// TODO: consider retrying

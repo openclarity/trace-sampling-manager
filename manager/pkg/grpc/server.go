@@ -100,10 +100,10 @@ func (s *Server) SetHostsToTrace(_ context.Context, request *api.HostsToTraceReq
 	return &api.Empty{}, nil
 }
 
-func (s *Server) SetHostsToRemove(_ context.Context, request *api.HostsToRemoveRequest) (*api.Empty, error) {
+func (s *Server) RemoveHostsToTrace(_ context.Context, request *api.RemoveHostsToTraceRequest) (*api.Empty, error) {
 	log.Debugf("Got hosts to remove. request=%+v", request)
 
-	s.Setter.SetHostsToRemove(&manager.HostsByComponentID{
+	s.Setter.RemoveHostsToTrace(&manager.HostsByComponentID{
 		Hosts: createHostsList(request.Hosts),
 	})
 
