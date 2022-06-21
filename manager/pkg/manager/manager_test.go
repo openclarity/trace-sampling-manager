@@ -322,7 +322,7 @@ func TestManager_SetHostsToTrace(t *testing.T) {
 	}
 	testHostToTraceBeforeWithTraceAnalyzer := []string{"host:8080", "blalala"}
 
-	hostsToTraceInput := &_interface.HostsToTrace{
+	hostsToTraceInput := &_interface.HostsByComponentID{
 		Hosts:       []string{"host:80", "host"},
 		ComponentID: TraceAnalyzer,
 	}
@@ -341,7 +341,7 @@ func TestManager_SetHostsToTrace(t *testing.T) {
 		componentIDToHosts  map[string][]string
 	}
 	type args struct {
-		hostsToTrace *_interface.HostsToTrace
+		hostsToTrace *_interface.HostsByComponentID
 	}
 	tests := []struct {
 		name                       string
@@ -399,6 +399,72 @@ func TestManager_SetHostsToTrace(t *testing.T) {
 			}
 			if !reflect.DeepEqual(m.componentIDToHosts, tt.expectedComponentIDToHosts) {
 				t.Errorf("initHostToTrace() componentIDToHosts missmatch. got = %+v, expected = %+v", m.componentIDToHosts, tt.expectedComponentIDToHosts)
+			}
+		})
+	}
+}
+
+func Test_removeHosts(t *testing.T) {
+	type args struct {
+		from     []string
+		toRemove []string
+	}
+	tests := []struct {
+		name string
+		args args
+		want []string
+	}{
+		{
+			name: "sanity",
+			args: args{
+				from:     []string{
+					"host1", "host2", "host3",
+				},
+				toRemove: []string{
+					"host2",
+				},
+			},
+			want: []string{
+				"host1", "host3",
+			},
+		},
+		{
+			name: "nothing to remove",
+			args: args{
+				from:     []string{
+					"host1", "host2", "host3",
+				},
+				toRemove: []string{},
+			},
+			want: []string{
+				"host1", "host2", "host3",
+			},
+		},
+		{
+			name: "remove all",
+			args: args{
+				from:     []string{
+					"host1", "host2", "host3",
+				},
+				toRemove: []string{
+					"host1", "host2", "host3",
+				},
+			},
+			want: []string{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := removeHosts(tt.args.from, tt.args.toRemove)
+			sort.Slice(tt.want, func(i, j int) bool {
+				return tt.want[i] < tt.want[j]
+			})
+			sort.Slice(got, func(i, j int) bool {
+				return got[i] < got[j]
+			})
+
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("removeHosts() = %v, want %v", got, tt.want)
 			}
 		})
 	}

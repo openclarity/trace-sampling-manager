@@ -15,7 +15,7 @@
 
 package interfacemanager
 
-type HostsToTrace struct {
+type HostsByComponentID struct {
 	Hosts       []string
 	ComponentID string
 }
@@ -26,7 +26,7 @@ type Getter interface {
 }
 
 type Setter interface {
-	SetHostsToTrace(hostsToTrace *HostsToTrace)
+	SetHostsToTrace(hostsToTrace *HostsByComponentID)
 	SetMode(enable bool)
-	SetHostsToRemove(hostsToTrace *HostsToTrace)
+	SetHostsToRemove(hostsToTrace *HostsByComponentID)
 }

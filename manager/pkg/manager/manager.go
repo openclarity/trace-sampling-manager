@@ -127,7 +127,7 @@ func (m *Manager) SetMode(enable bool) {
 	m.enabled = enable
 }
 
-func (m *Manager) SetHostsToTrace(hostsToTrace *_interface.HostsToTrace) {
+func (m *Manager) SetHostsToTrace(hostsToTrace *_interface.HostsByComponentID) {
 	m.Lock()
 	defer m.Unlock()
 
@@ -140,7 +140,7 @@ func (m *Manager) SetHostsToTrace(hostsToTrace *_interface.HostsToTrace) {
 	}
 }
 
-func (m *Manager) SetHostsToRemove(hostsToTrace *_interface.HostsToTrace) {
+func (m *Manager) SetHostsToRemove(hostsToTrace *_interface.HostsByComponentID) {
 	m.Lock()
 	defer m.Unlock()
 

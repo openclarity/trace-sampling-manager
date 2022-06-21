@@ -93,8 +93,8 @@ func createAPIHost(host string) (ret *api.Host, err error) {
 func (s *Server) SetHostsToTrace(_ context.Context, request *api.HostsToTraceRequest) (*api.Empty, error) {
 	log.Debugf("Got hosts to trace. request=%+v", request)
 
-	s.Setter.SetHostsToTrace(&manager.HostsToTrace{
-		Hosts: createHostsToTrace(request.Hosts),
+	s.Setter.SetHostsToTrace(&manager.HostsByComponentID{
+		Hosts: createHostsList(request.Hosts),
 	})
 
 	return &api.Empty{}, nil
@@ -103,8 +103,8 @@ func (s *Server) SetHostsToTrace(_ context.Context, request *api.HostsToTraceReq
 func (s *Server) SetHostsToRemove(_ context.Context, request *api.HostsToRemoveRequest) (*api.Empty, error) {
 	log.Debugf("Got hosts to remove. request=%+v", request)
 
-	s.Setter.SetHostsToTrace(&manager.HostsToTrace{
-		Hosts: createHostsToTrace(request.Hosts),
+	s.Setter.SetHostsToRemove(&manager.HostsByComponentID{
+		Hosts: createHostsList(request.Hosts),
 	})
 
 	return &api.Empty{}, nil
@@ -118,7 +118,7 @@ func (s *Server) SetMode(_ context.Context, request *api.SetModeRequest) (*api.E
 	return &api.Empty{}, nil
 }
 
-func createHostsToTrace(hosts []*api.Host) (ret []string) {
+func createHostsList(hosts []*api.Host) (ret []string) {
 	for _, host := range hosts {
 		ret = append(ret, createHosts(host)...)
 	}
