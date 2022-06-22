@@ -13,19 +13,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package interfacemanager
+package utils
 
-type HostsByComponentID struct {
-	Hosts       []string
-	ComponentID string
-}
-
-type Getter interface {
-	HostsToTrace() []string
-	HostsToTraceByComponentID(id string) []string
-}
-
-type Setter interface {
-	SetHostsToTrace(hostsToTrace *HostsByComponentID)
-	RemoveHostsToTrace(hostsToRemove *HostsByComponentID)
+func RemoveFromSlice(from, toRemove []string) []string {
+	ret := []string{}
+	hostsToRemove := map[string]bool{}
+	for _, host := range toRemove {
+		hostsToRemove[host] = true
+	}
+	for _, host := range from {
+		if !hostsToRemove[host] {
+			ret = append(ret, host)
+		}
+	}
+	return ret
 }

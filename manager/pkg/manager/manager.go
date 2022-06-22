@@ -30,6 +30,7 @@ import (
 	"github.com/openclarity/trace-sampling-manager/manager/pkg/grpc"
 	_interface "github.com/openclarity/trace-sampling-manager/manager/pkg/manager/interface"
 	"github.com/openclarity/trace-sampling-manager/manager/pkg/rest"
+	"github.com/openclarity/trace-sampling-manager/manager/pkg/utils"
 )
 
 const (
@@ -110,12 +111,24 @@ func (m *Manager) HostsToTraceByComponentID(id string) []string {
 	return m.componentIDToHosts[id]
 }
 
-func (m *Manager) SetHostsToTrace(hostsToTrace *_interface.HostsToTrace) {
+func (m *Manager) SetHostsToTrace(hostsToTrace *_interface.HostsByComponentID) {
 	m.Lock()
 	defer m.Unlock()
 
 	// reset to the most up-to-date hosts list for the given component
 	m.componentIDToHosts[hostsToTrace.ComponentID] = hostsToTrace.Hosts
+	m.hostsToTrace = createHostsToTrace(m.componentIDToHosts)
+	if err := m.saveComponentIDToHosts(); err != nil {
+		// TODO: consider retrying
+		log.Errorf("failed to save component ID to hosts: %v", err)
+	}
+}
+
+func (m *Manager) RemoveHostsToTrace(hostsToRemove *_interface.HostsByComponentID) {
+	m.Lock()
+	defer m.Unlock()
+
+	m.componentIDToHosts[hostsToRemove.ComponentID] = utils.RemoveFromSlice(m.componentIDToHosts[hostsToRemove.ComponentID], hostsToRemove.Hosts)
 	m.hostsToTrace = createHostsToTrace(m.componentIDToHosts)
 	if err := m.saveComponentIDToHosts(); err != nil {
 		// TODO: consider retrying

@@ -322,7 +322,7 @@ func TestManager_SetHostsToTrace(t *testing.T) {
 	}
 	testHostToTraceBeforeWithTraceAnalyzer := []string{"host:8080", "blalala"}
 
-	hostsToTraceInput := &_interface.HostsToTrace{
+	hostsToTraceInput := &_interface.HostsByComponentID{
 		Hosts:       []string{"host:80", "host"},
 		ComponentID: TraceAnalyzer,
 	}
@@ -341,7 +341,7 @@ func TestManager_SetHostsToTrace(t *testing.T) {
 		componentIDToHosts  map[string][]string
 	}
 	type args struct {
-		hostsToTrace *_interface.HostsToTrace
+		hostsToTrace *_interface.HostsByComponentID
 	}
 	tests := []struct {
 		name                       string
