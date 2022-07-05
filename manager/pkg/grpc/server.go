@@ -100,6 +100,16 @@ func (s *Server) SetHostsToTrace(_ context.Context, request *api.HostsToTraceReq
 	return &api.Empty{}, nil
 }
 
+func (s *Server) AddHostsToTrace(_ context.Context, request *api.AddHostsToTraceRequest) (*api.Empty, error) {
+	log.Debugf("Got hosts to add. request=%+v", request)
+
+	s.Setter.AddHostsToTrace(&manager.HostsByComponentID{
+		Hosts: createHostsList(request.Hosts),
+	})
+
+	return &api.Empty{}, nil
+}
+
 func (s *Server) RemoveHostsToTrace(_ context.Context, request *api.RemoveHostsToTraceRequest) (*api.Empty, error) {
 	log.Debugf("Got hosts to remove. request=%+v", request)
 
