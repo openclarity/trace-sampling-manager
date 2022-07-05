@@ -111,6 +111,18 @@ func (m *Manager) HostsToTraceByComponentID(id string) []string {
 	return m.componentIDToHosts[id]
 }
 
+func (m *Manager) AddHostsToTrace(hostsToAdd *_interface.HostsByComponentID) {
+	m.Lock()
+	defer m.Unlock()
+
+	m.componentIDToHosts[hostsToAdd.ComponentID] = utils.AddToSlice(m.componentIDToHosts[hostsToAdd.ComponentID], hostsToAdd.Hosts)
+	m.hostsToTrace = createHostsToTrace(m.componentIDToHosts)
+	if err := m.saveComponentIDToHosts(); err != nil {
+		// TODO: consider retrying
+		log.Errorf("failed to save component ID to hosts: %v", err)
+	}
+}
+
 func (m *Manager) SetHostsToTrace(hostsToTrace *_interface.HostsByComponentID) {
 	m.Lock()
 	defer m.Unlock()

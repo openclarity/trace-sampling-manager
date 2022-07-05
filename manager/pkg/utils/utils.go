@@ -28,3 +28,18 @@ func RemoveFromSlice(from, toRemove []string) []string {
 	}
 	return ret
 }
+
+func AddToSlice(from, toAdd []string) []string {
+	ret := []string{}
+	hostsToAdd := map[string]bool{}
+	for _, host := range toAdd {
+		hostsToAdd[host] = true
+		ret = append(ret, host)
+	}
+	for _, host := range from {
+		if !hostsToAdd[host] {
+			ret = append(ret, host)
+		}
+	}
+	return ret
+}
