@@ -24,6 +24,7 @@ import (
 	"github.com/golang/mock/gomock"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	_interface "github.com/openclarity/trace-sampling-manager/manager/pkg/manager/interface"
@@ -130,8 +131,9 @@ func TestManager_getComponentIDToHosts(t *testing.T) {
 		TraceAnalyzer:     {"host:80", "host"},
 		SpecReconstructor: {"host:8080"},
 	}
+	testHostsToTraceSecretMeta := createHostToTraceSecretMeta("test-name", "test-namespace", "test-owner")
 
-	testSecret, _ := createSecret(testComponentIDToHosts)
+	testSecret, _ := createSecret(testComponentIDToHosts, testHostsToTraceSecretMeta)
 
 	type fields struct {
 		expectSecretHandler func(handler *secret.MockHandler)
@@ -146,7 +148,7 @@ func TestManager_getComponentIDToHosts(t *testing.T) {
 			name: "secret not found - expected empty result",
 			fields: fields{
 				expectSecretHandler: func(handler *secret.MockHandler) {
-					handler.EXPECT().Get(hostToTraceSecretMeta).Return(nil, errors.NewNotFound(secretGroupResource, ""))
+					handler.EXPECT().Get(testHostsToTraceSecretMeta).Return(nil, errors.NewNotFound(secretGroupResource, ""))
 				},
 			},
 			want:    nil,
@@ -156,7 +158,7 @@ func TestManager_getComponentIDToHosts(t *testing.T) {
 			name: "failed to get secret - expected error",
 			fields: fields{
 				expectSecretHandler: func(handler *secret.MockHandler) {
-					handler.EXPECT().Get(hostToTraceSecretMeta).Return(nil, errors.NewBadRequest(""))
+					handler.EXPECT().Get(testHostsToTraceSecretMeta).Return(nil, errors.NewBadRequest(""))
 				},
 			},
 			want:    nil,
@@ -166,8 +168,8 @@ func TestManager_getComponentIDToHosts(t *testing.T) {
 			name: "data in secret is empty",
 			fields: fields{
 				expectSecretHandler: func(handler *secret.MockHandler) {
-					handler.EXPECT().Get(hostToTraceSecretMeta).Return(&corev1.Secret{
-						ObjectMeta: hostToTraceSecretMeta,
+					handler.EXPECT().Get(testHostsToTraceSecretMeta).Return(&corev1.Secret{
+						ObjectMeta: testHostsToTraceSecretMeta,
 						Data:       map[string][]byte{},
 					}, nil)
 				},
@@ -179,8 +181,8 @@ func TestManager_getComponentIDToHosts(t *testing.T) {
 			name: "failed to unmarshal secret data",
 			fields: fields{
 				expectSecretHandler: func(handler *secret.MockHandler) {
-					handler.EXPECT().Get(hostToTraceSecretMeta).Return(&corev1.Secret{
-						ObjectMeta: hostToTraceSecretMeta,
+					handler.EXPECT().Get(testHostsToTraceSecretMeta).Return(&corev1.Secret{
+						ObjectMeta: testHostsToTraceSecretMeta,
 						Data: map[string][]byte{
 							dataFieldName: []byte("not a map"),
 						},
@@ -194,7 +196,7 @@ func TestManager_getComponentIDToHosts(t *testing.T) {
 			name: "success",
 			fields: fields{
 				expectSecretHandler: func(handler *secret.MockHandler) {
-					handler.EXPECT().Get(hostToTraceSecretMeta).Return(testSecret, nil)
+					handler.EXPECT().Get(testHostsToTraceSecretMeta).Return(testSecret, nil)
 				},
 			},
 			want:    testComponentIDToHosts,
@@ -204,7 +206,8 @@ func TestManager_getComponentIDToHosts(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := &Manager{
-				Handler: secretMockHandler,
+				Handler:               secretMockHandler,
+				hostToTraceSecretMeta: testHostsToTraceSecretMeta,
 			}
 			tt.fields.expectSecretHandler(secretMockHandler)
 			got, err := m.getComponentIDToHosts()
@@ -230,9 +233,10 @@ func TestManager_initHostToTrace(t *testing.T) {
 		SpecReconstructor: {"host:8080"},
 	}
 
-	testSecret, _ := createSecret(testComponentIDToHosts)
-	testSecretNilMap, _ := createSecret(nil)
-	testSecretEmptyMap, _ := createSecret(map[string][]string{})
+	testHostsToTraceSecretMeta := createHostToTraceSecretMeta("test-name", "test-namespace", "test-owner")
+	testSecret, _ := createSecret(testComponentIDToHosts, testHostsToTraceSecretMeta)
+	testSecretNilMap, _ := createSecret(nil, testHostsToTraceSecretMeta)
+	testSecretEmptyMap, _ := createSecret(map[string][]string{}, testHostsToTraceSecretMeta)
 
 	type fields struct {
 		expectSecretHandler func(handler *secret.MockHandler)
@@ -247,7 +251,7 @@ func TestManager_initHostToTrace(t *testing.T) {
 			name: "failed to get component ID",
 			fields: fields{
 				expectSecretHandler: func(handler *secret.MockHandler) {
-					handler.EXPECT().Get(hostToTraceSecretMeta).Return(nil, errors.NewBadRequest(""))
+					handler.EXPECT().Get(testHostsToTraceSecretMeta).Return(nil, errors.NewBadRequest(""))
 				},
 			},
 			expectedComponentIDToHosts: map[string][]string{},
@@ -257,7 +261,7 @@ func TestManager_initHostToTrace(t *testing.T) {
 			name: "Successfully initialized host to trace state",
 			fields: fields{
 				expectSecretHandler: func(handler *secret.MockHandler) {
-					handler.EXPECT().Get(hostToTraceSecretMeta).Return(testSecret, nil)
+					handler.EXPECT().Get(testHostsToTraceSecretMeta).Return(testSecret, nil)
 				},
 			},
 			expectedComponentIDToHosts: testComponentIDToHosts,
@@ -267,7 +271,7 @@ func TestManager_initHostToTrace(t *testing.T) {
 			name: "Nil map in secret initialized host to trace state",
 			fields: fields{
 				expectSecretHandler: func(handler *secret.MockHandler) {
-					handler.EXPECT().Get(hostToTraceSecretMeta).Return(testSecretNilMap, nil)
+					handler.EXPECT().Get(testHostsToTraceSecretMeta).Return(testSecretNilMap, nil)
 				},
 			},
 			expectedComponentIDToHosts: make(map[string][]string),
@@ -277,7 +281,7 @@ func TestManager_initHostToTrace(t *testing.T) {
 			name: "Empty map in secret initialized host to trace state",
 			fields: fields{
 				expectSecretHandler: func(handler *secret.MockHandler) {
-					handler.EXPECT().Get(hostToTraceSecretMeta).Return(testSecretEmptyMap, nil)
+					handler.EXPECT().Get(testHostsToTraceSecretMeta).Return(testSecretEmptyMap, nil)
 				},
 			},
 			expectedComponentIDToHosts: make(map[string][]string),
@@ -287,7 +291,8 @@ func TestManager_initHostToTrace(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := &Manager{
-				Handler: secretMockHandler,
+				Handler:               secretMockHandler,
+				hostToTraceSecretMeta: testHostsToTraceSecretMeta,
 			}
 			tt.fields.expectSecretHandler(secretMockHandler)
 			m.initHostToTrace()
@@ -332,8 +337,9 @@ func TestManager_SetHostsToTrace(t *testing.T) {
 		SpecReconstructor: {"host:8080"},
 	}
 	testHostToTraceAfter := []string{"host:80", "host", "host:8080"}
+	testHostsToTraceSecretMeta := createHostToTraceSecretMeta("test-name", "test-namespace", "test-owner")
 
-	testSecret, _ := createSecret(testComponentIDToHostsAfter)
+	testSecret, _ := createSecret(testComponentIDToHostsAfter, testHostsToTraceSecretMeta)
 
 	type fields struct {
 		expectSecretHandler func(handler *secret.MockHandler)
@@ -384,9 +390,10 @@ func TestManager_SetHostsToTrace(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := &Manager{
-				Handler:            secretMockHandler,
-				hostsToTrace:       tt.fields.hostsToTrace,
-				componentIDToHosts: tt.fields.componentIDToHosts,
+				Handler:               secretMockHandler,
+				hostsToTrace:          tt.fields.hostsToTrace,
+				componentIDToHosts:    tt.fields.componentIDToHosts,
+				hostToTraceSecretMeta: testHostsToTraceSecretMeta,
 			}
 			tt.fields.expectSecretHandler(secretMockHandler)
 
@@ -399,6 +406,40 @@ func TestManager_SetHostsToTrace(t *testing.T) {
 			}
 			if !reflect.DeepEqual(m.componentIDToHosts, tt.expectedComponentIDToHosts) {
 				t.Errorf("initHostToTrace() componentIDToHosts missmatch. got = %+v, expected = %+v", m.componentIDToHosts, tt.expectedComponentIDToHosts)
+			}
+		})
+	}
+}
+
+func Test_createHostToTraceSecretMeta(t *testing.T) {
+	type args struct {
+		secretName      string
+		secretNamespace string
+		secretOwner     string
+	}
+	tests := []struct {
+		name string
+		args args
+		want metav1.ObjectMeta
+	}{
+		{
+			name: "sanity",
+			args: args{
+				secretName:      "test-name",
+				secretNamespace: "test-namespace",
+				secretOwner:     "test-owner",
+			},
+			want: metav1.ObjectMeta{
+				Name:      "test-name",
+				Namespace: "test-namespace",
+				Labels:    map[string]string{"owner": "test-owner"},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := createHostToTraceSecretMeta(tt.args.secretName, tt.args.secretNamespace, tt.args.secretOwner); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("createHostToTraceSecretMeta() = %v, want %v", got, tt.want)
 			}
 		})
 	}

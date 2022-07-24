@@ -34,20 +34,23 @@ import (
 )
 
 const (
-	dataFieldName              = "hosts-per-component-map"
-	hostToTraceSecretName      = "host-to-trace"
-	hostToTraceSecretNamespace = "portshift"
+	dataFieldName = "hosts-per-component-map"
 )
 
-var hostToTraceSecretMeta = metav1.ObjectMeta{
-	Name:      hostToTraceSecretName,
-	Namespace: hostToTraceSecretNamespace,
-	Labels:    map[string]string{"owner": "portshift"},
+func createHostToTraceSecretMeta(secretName string, secretNamespace string, secretOwner string) metav1.ObjectMeta {
+	return metav1.ObjectMeta{
+		Name:      secretName,
+		Namespace: secretNamespace,
+		Labels:    map[string]string{"owner": secretOwner},
+	}
 }
 
 type Config struct {
-	RestServerPort int
-	GRPCServerPort int
+	RestServerPort             int
+	GRPCServerPort             int
+	HostToTraceSecretName      string
+	HostToTraceSecretNamespace string
+	HostToTraceSecretOwnerName string
 }
 
 type Manager struct {
@@ -55,8 +58,9 @@ type Manager struct {
 	restServer *rest.Server
 	grpcServer *grpc.Server
 
-	hostsToTrace       []string
-	componentIDToHosts map[string][]string
+	hostsToTrace          []string
+	componentIDToHosts    map[string][]string
+	hostToTraceSecretMeta metav1.ObjectMeta
 
 	sync.RWMutex
 }
@@ -64,7 +68,8 @@ type Manager struct {
 func Create(clientset kubernetes.Interface, conf *Config) (*Manager, error) {
 	var err error
 	m := &Manager{
-		Handler: _secret.NewHandler(clientset),
+		Handler:               _secret.NewHandler(clientset),
+		hostToTraceSecretMeta: createHostToTraceSecretMeta(conf.HostToTraceSecretName, conf.HostToTraceSecretNamespace, conf.HostToTraceSecretOwnerName),
 	}
 
 	m.initHostToTrace()
@@ -159,7 +164,7 @@ func (m *Manager) getComponentIDToHosts() (map[string][]string, error) {
 	var s *corev1.Secret
 	var err error
 
-	if s, err = m.Get(hostToTraceSecretMeta); err != nil {
+	if s, err = m.Get(m.hostToTraceSecretMeta); err != nil {
 		if errors.IsNotFound(err) {
 			log.Infof("Secret not found: %v", err)
 			return nil, nil
@@ -202,7 +207,7 @@ func (m *Manager) saveComponentIDToHosts() error {
 	var s *corev1.Secret
 	var err error
 
-	if s, err = createSecret(m.componentIDToHosts); err != nil {
+	if s, err = createSecret(m.componentIDToHosts, m.hostToTraceSecretMeta); err != nil {
 		return fmt.Errorf("failed to create secret object: %v", err)
 	}
 
@@ -213,14 +218,14 @@ func (m *Manager) saveComponentIDToHosts() error {
 	return nil
 }
 
-func createSecret(hosts map[string][]string) (*corev1.Secret, error) {
+func createSecret(hosts map[string][]string, meta metav1.ObjectMeta) (*corev1.Secret, error) {
 	dataB, err := json.Marshal(hosts)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal component to hosts map: %v", err)
 	}
 
 	return &corev1.Secret{
-		ObjectMeta: hostToTraceSecretMeta,
+		ObjectMeta: meta,
 		Data: map[string][]byte{
 			dataFieldName: dataB,
 		},
