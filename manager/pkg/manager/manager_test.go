@@ -332,8 +332,9 @@ func TestManager_AddHostsToTrace(t *testing.T) {
 		SpecReconstructor: {"host:8080"},
 	}
 	testHostToTraceAfter := []string{"blalala", "host:80", "yeah", "host:8080"}
+	testHostsToTraceSecretMeta := createHostToTraceSecretMeta("test-name", "test-namespace", "test-owner")
 
-	testSecret, _ := createSecret(testComponentIDToHostsAfter)
+	testSecret, _ := createSecret(testComponentIDToHostsAfter, testHostsToTraceSecretMeta)
 
 	type fields struct {
 		expectSecretHandler func(handler *secret.MockHandler)
@@ -369,9 +370,10 @@ func TestManager_AddHostsToTrace(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := &Manager{
-				Handler:            secretMockHandler,
-				hostsToTrace:       tt.fields.hostsToTrace,
-				componentIDToHosts: tt.fields.componentIDToHosts,
+				Handler:               secretMockHandler,
+				hostsToTrace:          tt.fields.hostsToTrace,
+				componentIDToHosts:    tt.fields.componentIDToHosts,
+				hostToTraceSecretMeta: testHostsToTraceSecretMeta,
 			}
 			tt.fields.expectSecretHandler(secretMockHandler)
 
