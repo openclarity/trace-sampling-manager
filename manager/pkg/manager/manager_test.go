@@ -310,6 +310,85 @@ func TestManager_initHostToTrace(t *testing.T) {
 	}
 }
 
+func TestManager_AddHostsToTrace(t *testing.T) {
+	mock := gomock.NewController(t)
+	defer mock.Finish()
+
+	secretMockHandler := secret.NewMockHandler(mock)
+
+	testComponentIDToHostsBefore := map[string][]string{
+		TraceAnalyzer:     {"yeah", "blalala"},
+		SpecReconstructor: {"host:8080"},
+	}
+	testHostToTraceBefore := []string{"host:8080", "blalala"}
+
+	hostsToTraceInput := &_interface.HostsByComponentID{
+		Hosts:       []string{"host:80", "yeah"},
+		ComponentID: TraceAnalyzer,
+	}
+
+	testComponentIDToHostsAfter := map[string][]string{
+		TraceAnalyzer:     {"host:80", "yeah", "blalala"},
+		SpecReconstructor: {"host:8080"},
+	}
+	testHostToTraceAfter := []string{"blalala", "host:80", "yeah", "host:8080"}
+
+	testSecret, _ := createSecret(testComponentIDToHostsAfter)
+
+	type fields struct {
+		expectSecretHandler func(handler *secret.MockHandler)
+		hostsToTrace        []string
+		componentIDToHosts  map[string][]string
+	}
+	type args struct {
+		hostsToTrace *_interface.HostsByComponentID
+	}
+	tests := []struct {
+		name                       string
+		fields                     fields
+		args                       args
+		expectedComponentIDToHosts map[string][]string
+		expectedHostsToTrace       []string
+	}{
+		{
+			name: "Hosts added correctly to TraceAnalyzer",
+			fields: fields{
+				expectSecretHandler: func(handler *secret.MockHandler) {
+					handler.EXPECT().CreateOrUpdate(testSecret).Return(nil, nil)
+				},
+				hostsToTrace:       testHostToTraceBefore,
+				componentIDToHosts: testComponentIDToHostsBefore,
+			},
+			args: args{
+				hostsToTrace: hostsToTraceInput,
+			},
+			expectedComponentIDToHosts: testComponentIDToHostsAfter,
+			expectedHostsToTrace:       testHostToTraceAfter,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &Manager{
+				Handler:            secretMockHandler,
+				hostsToTrace:       tt.fields.hostsToTrace,
+				componentIDToHosts: tt.fields.componentIDToHosts,
+			}
+			tt.fields.expectSecretHandler(secretMockHandler)
+
+			m.AddHostsToTrace(tt.args.hostsToTrace)
+
+			sort.Strings(m.hostsToTrace)
+			sort.Strings(tt.expectedHostsToTrace)
+			if !reflect.DeepEqual(m.hostsToTrace, tt.expectedHostsToTrace) {
+				t.Errorf("addHostToTrace() hostsToTrace missmatch. got = %+v, expected = %+v", m.hostsToTrace, tt.expectedHostsToTrace)
+			}
+			if !reflect.DeepEqual(m.componentIDToHosts, tt.expectedComponentIDToHosts) {
+				t.Errorf("addHostsToTrace() componentIDToHosts missmatch. got = %+v, expected = %+v", m.componentIDToHosts, tt.expectedComponentIDToHosts)
+			}
+		})
+	}
+}
+
 func TestManager_SetHostsToTrace(t *testing.T) {
 	mock := gomock.NewController(t)
 	defer mock.Finish()
@@ -402,10 +481,10 @@ func TestManager_SetHostsToTrace(t *testing.T) {
 			sort.Strings(m.hostsToTrace)
 			sort.Strings(tt.expectedHostsToTrace)
 			if !reflect.DeepEqual(m.hostsToTrace, tt.expectedHostsToTrace) {
-				t.Errorf("initHostToTrace() hostsToTrace missmatch. got = %+v, expected = %+v", m.hostsToTrace, tt.expectedHostsToTrace)
+				t.Errorf("SetHostToTrace() hostsToTrace missmatch. got = %+v, expected = %+v", m.hostsToTrace, tt.expectedHostsToTrace)
 			}
 			if !reflect.DeepEqual(m.componentIDToHosts, tt.expectedComponentIDToHosts) {
-				t.Errorf("initHostToTrace() componentIDToHosts missmatch. got = %+v, expected = %+v", m.componentIDToHosts, tt.expectedComponentIDToHosts)
+				t.Errorf("SetHostToTrace() componentIDToHosts missmatch. got = %+v, expected = %+v", m.componentIDToHosts, tt.expectedComponentIDToHosts)
 			}
 		})
 	}
