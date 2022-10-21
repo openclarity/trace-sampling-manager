@@ -20,19 +20,21 @@ import (
 
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/jessevdk/go-flags"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/openclarity/trace-sampling-manager/api/server/restapi"
 	"github.com/openclarity/trace-sampling-manager/api/server/restapi/operations"
-	manager "github.com/openclarity/trace-sampling-manager/manager/pkg/manager/interface"
+	"github.com/openclarity/trace-sampling-manager/manager/pkg/manager"
+	_interface "github.com/openclarity/trace-sampling-manager/manager/pkg/manager/interface"
 )
 
 type Server struct {
 	server *restapi.Server
-	manager.Getter
+	_interface.Getter
 }
 
-func CreateRESTServer(port int, getter manager.Getter) (*Server, error) {
+func CreateRESTServer(config *manager.Config, getter _interface.Getter) (*Server, error) {
 	s := &Server{
 		Getter: getter,
 	}
@@ -54,7 +56,15 @@ func CreateRESTServer(port int, getter manager.Getter) (*Server, error) {
 
 	server.ConfigureFlags()
 	server.ConfigureAPI()
-	server.Port = port
+	server.Port = config.RestServerPort
+
+	// We want to serve both http and https
+	if config.EnableTLS {
+		server.EnabledListeners = []string{"https", "http"}
+		server.TLSCertificate = flags.Filename(config.TLSServerCertFilePath)
+		server.TLSCertificateKey = flags.Filename(config.TLSServerKeyFilePath)
+		server.TLSPort = config.RestServerTLSPort
+	}
 
 	s.server = server
 

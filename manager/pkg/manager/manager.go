@@ -37,20 +37,25 @@ const (
 	dataFieldName = "hosts-per-component-map"
 )
 
+type Config struct {
+	EnableTLS                  bool
+	RestServerPort             int
+	RestServerTLSPort          int
+	GRPCServerPort             int
+	HostToTraceSecretName      string
+	HostToTraceSecretNamespace string
+	HostToTraceSecretOwnerName string
+	TLSServerCertFilePath      string
+	TLSServerKeyFilePath       string
+	RootCertFilePath           string
+}
+
 func createHostToTraceSecretMeta(secretName string, secretNamespace string, secretOwner string) metav1.ObjectMeta {
 	return metav1.ObjectMeta{
 		Name:      secretName,
 		Namespace: secretNamespace,
 		Labels:    map[string]string{"owner": secretOwner},
 	}
-}
-
-type Config struct {
-	RestServerPort             int
-	GRPCServerPort             int
-	HostToTraceSecretName      string
-	HostToTraceSecretNamespace string
-	HostToTraceSecretOwnerName string
 }
 
 type Manager struct {
@@ -74,7 +79,7 @@ func Create(clientset kubernetes.Interface, conf *Config) (*Manager, error) {
 
 	m.initHostToTrace()
 
-	m.restServer, err = rest.CreateRESTServer(conf.RestServerPort, m)
+	m.restServer, err = rest.CreateRESTServer(conf, m)
 	if err != nil {
 		return nil, fmt.Errorf("failed to start rest server: %v", err)
 	}
