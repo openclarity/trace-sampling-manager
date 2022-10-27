@@ -45,8 +45,12 @@ func CreateRESTServer(port int, getter manager.Getter) (*Server, error) {
 	api := operations.NewTraceSamplingManagerAPI(swaggerSpec)
 
 	api.GetHostsToTraceHandler = operations.GetHostsToTraceHandlerFunc(func(params operations.GetHostsToTraceParams) middleware.Responder {
+		hosts := s.HostsToTrace()
+		if hosts == nil {
+			hosts = []string{}
+		}
 		return operations.NewGetHostsToTraceOK().WithPayload(&operations.GetHostsToTraceOKBody{
-			Hosts: s.HostsToTrace(),
+			Hosts: hosts,
 		})
 	})
 
