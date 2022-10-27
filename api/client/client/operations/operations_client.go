@@ -47,7 +47,7 @@ func (a *Client) GetHostsToTrace(params *GetHostsToTraceParams, opts ...ClientOp
 		PathPattern:        "/hostsToTrace",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"http"},
 		Params:             params,
 		Reader:             &GetHostsToTraceReader{formats: a.formats},
 		Context:            params.Context,

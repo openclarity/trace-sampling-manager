@@ -76,6 +76,7 @@ func CreateRESTServer(config *Config, getter manager.Getter) (*Server, error) {
 
 	// We want to serve both http and https
 	if config.EnableTLS {
+		log.Infof("EnableTLS is ON")
 		server.EnabledListeners = []string{"https", "http"}
 		server.TLSCertificate = flags.Filename(config.TLSServerCertFilePath)
 		server.TLSCertificateKey = flags.Filename(config.TLSServerKeyFilePath)
