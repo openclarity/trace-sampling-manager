@@ -45,14 +45,6 @@ func createHostToTraceSecretMeta(secretName string, secretNamespace string, secr
 	}
 }
 
-type Config struct {
-	RestServerPort             int
-	GRPCServerPort             int
-	HostToTraceSecretName      string
-	HostToTraceSecretNamespace string
-	HostToTraceSecretOwnerName string
-}
-
 type Manager struct {
 	_secret.Handler
 	restServer *rest.Server
@@ -65,7 +57,7 @@ type Manager struct {
 	sync.RWMutex
 }
 
-func Create(clientset kubernetes.Interface, conf *Config) (*Manager, error) {
+func Create(clientset kubernetes.Interface, conf *rest.Config) (*Manager, error) {
 	var err error
 	m := &Manager{
 		Handler:               _secret.NewHandler(clientset),
@@ -74,7 +66,7 @@ func Create(clientset kubernetes.Interface, conf *Config) (*Manager, error) {
 
 	m.initHostToTrace()
 
-	m.restServer, err = rest.CreateRESTServer(conf.RestServerPort, m)
+	m.restServer, err = rest.CreateRESTServer(conf, m)
 	if err != nil {
 		return nil, fmt.Errorf("failed to start rest server: %v", err)
 	}
