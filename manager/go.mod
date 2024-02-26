@@ -10,8 +10,7 @@ require (
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/openclarity/trace-sampling-manager/api v0.0.0
 	github.com/sirupsen/logrus v1.8.1
-	google.golang.org/genproto v0.0.0-20210602131652-f16073e35f0c // indirect
-	google.golang.org/grpc v1.42.0
+	google.golang.org/grpc v1.56.3
 	k8s.io/api v0.23.5
 	k8s.io/apimachinery v0.23.5
 	k8s.io/client-go v0.23.5
